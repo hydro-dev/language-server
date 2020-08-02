@@ -1,0 +1,7 @@
+node_modules/
+*.hydro
+.build
+*.d.ts
+*.js.map
+*.js
+!.eslintrc.js
