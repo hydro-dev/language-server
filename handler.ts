@@ -1,44 +1,26 @@
-import 'hydrooj';
-import * as rpc from 'vscode-ws-jsonrpc';
-import * as server from 'vscode-ws-jsonrpc/lib/server';
-import * as lsp from 'vscode-languageserver';
+import * as server from '@codingame/monaco-jsonrpc/lib/server';
+import { Connection, ConnectionHandler } from 'hydrooj/src/service/server';
+import { launch } from './launch';
 
-const { Connection, ConnectionHandler } = global.Hydro.service.server;
+export class CppLspConnectionHandler extends ConnectionHandler {
+    noAuth = true;
+    server: server.IConnection;
 
-export function launch(socket: rpc.IWebSocket) {
-    const reader = new rpc.WebSocketMessageReader(socket);
-    const writer = new rpc.WebSocketMessageWriter(socket);
-    // start the language server as an external process
-    const extCppServer = '/usr/bin/clangd';
-    const socketConnection = server.createConnection(reader, writer, () => socket.dispose());
-    const serverConnection = server.createServerProcess('Cpp', extCppServer);
-    server.forward(socketConnection, serverConnection, (message) => {
-        if (rpc.isRequestMessage(message)) {
-            if (message.method === lsp.InitializeRequest.type.method) {
-                const initializeParams = message.params as lsp.InitializeParams;
-                initializeParams.processId = process.pid;
-            }
-        }
-        return message;
-    });
-}
-
-class LanguageHandler extends ConnectionHandler {
-    // eslint-disable-next-line class-methods-use-this
     async prepare() {
-        const socket: rpc.IWebSocket = {
-            send: (content) => this.conn.write(content),
-            onMessage: (cb) => this.conn.on('data', cb),
-            onError: (cb) => this.conn.on('error', cb),
-            onClose: (cb) => this.conn.on('close', () => cb(1000, '')),
-            dispose: () => this.conn.close(1000, 'closed'),
-        };
-        launch(socket);
+        this.server = launch({
+            send: (s) => this.conn.write(s),
+            onMessage: (cb) => this.conn.on('data', (msg) => cb(msg)),
+            onClose: (cb) => this.conn.on('close', (res, reason) => cb(res, reason)),
+            onError: (cb) => this.conn.on('error', (err) => cb(err)),
+            dispose: () => this.close(3000, 'disposed'),
+        });
+    }
+
+    async cleanup() {
+        this.server.dispose();
     }
 }
 
-export function apply() {
-    Connection('languageserver_cpp', '/languageServer/cpp', LanguageHandler);
-}
-
-global.Hydro.handler.language_javascript = apply;
+global.Hydro.handler.lsp_cpp = () => {
+    Connection('lsp_cpp', '/lsp/cpp', CppLspConnectionHandler);
+};

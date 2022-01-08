@@ -1,7 +1,4 @@
 node_modules/
-*.hydro
-.build
-*.d.ts
-*.js.map
-*.js
-!.eslintrc.js
+yarn.lock
+*.log
+public/
