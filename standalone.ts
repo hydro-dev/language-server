@@ -4,7 +4,7 @@ import { launch } from './launch';
 
 const echo = sockjs.createServer({ prefix: '/lsp/cpp' });
 echo.on('connection', function (conn) {
-    const style = conn.url.split('?style=')[1];
+    const style = decodeURIComponent(conn.url.split('?style=')[1] || '');
     const server = launch({
         send: (s) => conn.write(s),
         onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
