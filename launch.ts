@@ -14,12 +14,7 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
     const id = Math.random().toString(36).replace(/[^a-z0-9]+/g, '');
     const tmpFolder = '/tmp/clangd/' + id;
     ensureDirSync(tmpFolder);
-    if (style) {
-        const Style = yaml.load(style);
-        const config = { Style };
-        writeFileSync(join(tmpFolder, '.clangd'), yaml.dump(config));
-        writeFileSync(join(tmpFolder, '.clang-format'), style);
-    }
+    if (style) writeFileSync(join(tmpFolder, '.clang-format'), style.replace(/\r/g, ''));
     const serverConnection = server.createServerProcess('clangd', 'clangd', [
         '--pch-storage=memory',
         '--background-index',
@@ -27,7 +22,6 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
         '--suggest-missing-includes',
         '--log=error',
         '--header-insertion-decorators',
-        '--enable-config',
         '--limit-results=20',
     ], { cwd: tmpFolder });
     serverConnection.onClose(() => removeSync(tmpFolder));
