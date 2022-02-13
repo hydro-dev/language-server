@@ -17,7 +17,8 @@ function createWebSocket(url: string): any {
   return new ReconnectingWebSocket(url, [], socketOptions);
 }
 const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const url = `${protocol}://${window.location.host}/lsp/cpp/websocket`;
+let url = `${protocol}://${window.location.host}/lsp/cpp/websocket`;
+if (UserContext.formatStyle) url += '?style=' + encodeURIComponent(UserContext.formatStyle);
 
 window.exports = function apply(monaco: any) {
   MonacoServices.install(monaco);
