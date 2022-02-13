@@ -4,9 +4,9 @@ formatStyle:
   desc: clang format options
   category: preference
   value: |
-    BasedOnStyle: WebKit,
-    BreakBeforeBraces: Custom,
-    AllowShortCaseLabelsOnASingleLine: true,
-    AllowShortBlocksOnASingleLine: true,
-    AllowShortIfStatementsOnASingleLine: true,
+    BasedOnStyle: WebKit
+    BreakBeforeBraces: Custom
+    AllowShortCaseLabelsOnASingleLine: true
+    AllowShortBlocksOnASingleLine: true
+    AllowShortIfStatementsOnASingleLine: true
     AllowShortLoopsOnASingleLine: true
