@@ -1,9 +1,9 @@
 import * as sockjs from 'sockjs';
 import http from 'http';
-import { launch } from './launch';
+import { launch as launchCpp } from './providers/cpp';
+import { launch as launchPython } from './providers/python';
 
-const echo = sockjs.createServer({ prefix: '/lsp/cpp' });
-echo.on('connection', function (conn) {
+const handler = (launch) => function (conn) {
     const style = decodeURIComponent(conn.url.split('?style=')[1] || '');
     const server = launch({
         send: (s) => conn.write(s),
@@ -13,10 +13,18 @@ echo.on('connection', function (conn) {
         dispose: () => conn.close('3000', 'disposed'),
     }, style);
     conn.on('close', () => server.dispose());
-});
+}
 
 const server = http.createServer();
-echo.installHandlers(server);
+
+const cpp = sockjs.createServer({ prefix: '/lsp/cpp' });
+cpp.on('connection', handler(launchCpp));
+cpp.installHandlers(server);
+
+const python = sockjs.createServer({ prefix: '/lsp/python' });
+python.on('connection', handler(launchPython));
+python.installHandlers(server);
+
 server.listen(+process.argv[1] || +process.argv[2] || 9999, '0.0.0.0', () => {
     console.log('Server listening at ' + (server.address() as any).port);
 });

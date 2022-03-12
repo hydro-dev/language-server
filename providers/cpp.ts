@@ -3,7 +3,6 @@ import { ensureDirSync, removeSync, writeFileSync } from 'fs-extra';
 import * as lsp from 'vscode-languageserver';
 import * as server from '@codingame/monaco-jsonrpc/lib/server';
 import { join } from 'path';
-import yaml from 'js-yaml';
 
 ensureDirSync('/tmp/clangd');
 

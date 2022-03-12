@@ -1,14 +1,19 @@
 import * as server from '@codingame/monaco-jsonrpc/lib/server';
 import { Connection, ConnectionHandler } from 'hydrooj/src/service/server';
-import { launch } from './launch';
+import { launch as launchCpp } from './providers/cpp';
+import { launch as launchPython } from './providers/python';
 
-export class CppLspConnectionHandler extends ConnectionHandler {
+const providers = {
+    cpp: launchCpp,
+    python: launchPython,
+}
+
+const getHandler = (type: string) => class LspConnectionHandler extends ConnectionHandler {
     noAuth = true;
     server: server.IConnection;
 
     async prepare({ style }) {
-        console.log(style);
-        this.server = launch({
+        this.server = providers[type]({
             send: (s) => this.conn.write(s),
             onMessage: (cb) => this.conn.on('data', (msg) => cb(msg)),
             onClose: (cb) => this.conn.on('close', (res, reason) => cb(res, reason)),
@@ -22,6 +27,7 @@ export class CppLspConnectionHandler extends ConnectionHandler {
     }
 }
 
-global.Hydro.handler.lsp_cpp = () => {
-    Connection('lsp_cpp', '/lsp/cpp', CppLspConnectionHandler);
+global.Hydro.handler.lsp = () => {
+    Connection('lsp', '/lsp/cpp', getHandler('cpp'));
+    Connection('lsp', '/lsp/python', getHandler('python'));
 };
