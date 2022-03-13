@@ -1,3 +1,5 @@
-# language-server-cpp
+# language-server
 
-C/Cpp language intergration
+**THIS IS UNSAFE! RUN IN A VIRTUAL MACHINE WITH FIREWALL ENABLED!**
+
+Hydro Language Server Integration
