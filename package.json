@@ -1,6 +1,6 @@
 {
   "name": "@hydrooj/language-server-cpp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "package.json",
   "repository": "git@github.com:hydro-dev/language-server-cpp.git",
   "author": "undefined <masnn0@outlook.com>",
@@ -10,21 +10,18 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@codingame/monaco-languageclient": "^0.17.3",
+    "@codingame/monaco-languageclient": "^0.17.4",
     "@types/fs-extra": "^9.0.13",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^14.0.27",
     "@types/sockjs": "^0.3.33",
-    "esbuild": "^0.14.10",
+    "esbuild": "^0.14.38",
     "esbuild-plugin-alias": "^0.2.1",
     "reconnecting-websocket": "^4.4.0"
   },
-  "peerDependencies": {
-    "hydrooj": "^3.3.20"
-  },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "^0.3.1",
-    "fs-extra": "^10.0.0",
+    "fs-extra": "^10.1.0",
     "js-yaml": "^4.1.0",
     "sockjs": "^0.3.24",
     "vscode-languageserver": "^7.0.0"
