@@ -7,7 +7,7 @@ fs.emptyDirSync('public')
 esbuild.build({
     bundle: true,
     minify: true,
-    entryPoints: ['./src/cpp.ts', './src/python.ts'],
+    entryPoints: ['./src/lsp.ts'],
     outdir: './public/',
     plugins: [
         alias({
@@ -15,10 +15,11 @@ esbuild.build({
         }),
     ],
 }).then(() => {
-    for (const t of ['cpp', 'python']) {
-        const data = fs.readFileSync('./public/' + t + '.js', 'utf8');
-        const hash = crypto.createHash('md5').update(data).digest('hex').substring(0, 8);
-        fs.renameSync(`./public/${t}.js`, `./public/lsp-${t}-${hash}.js`);
-        fs.writeFileSync(`./public/lsp-${t}.page.js`, `window.externalModules['monaco-${t}']=UiContext.cdn_prefix+'lsp-${t}-${hash}.js';`);
-    }
+    const data = fs.readFileSync('./public/lsp.js', 'utf8');
+    const hash = crypto.createHash('md5').update(data).digest('hex').substring(0, 8);
+    fs.renameSync(`./public/lsp.js`, `./public/lsp-${hash}.js`);
+    fs.writeFileSync(
+        `./public/lsp-index.page.js`,
+        `window.externalModules['monaco-cpp']=window.externalModules['monaco-python']=UiContext.cdn_prefix+'lsp-${hash}.js';`
+    );
 });

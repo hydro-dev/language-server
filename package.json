@@ -1,11 +1,11 @@
 {
-  "name": "@hydrooj/language-server-cpp",
+  "name": "@hydrooj/language-server",
   "version": "0.0.2",
   "main": "package.json",
-  "repository": "git@github.com:hydro-dev/language-server-cpp.git",
+  "repository": "git@github.com:hydro-dev/language-server.git",
   "author": "undefined <masnn0@outlook.com>",
   "license": "AGPL-3.0-only",
-  "bin": "bin/hydro-language-server-cpp",
+  "bin": "bin/hydro-language-server",
   "scripts": {
     "build": "node build.js"
   },
@@ -17,6 +17,7 @@
     "@types/sockjs": "^0.3.33",
     "esbuild": "^0.14.38",
     "esbuild-plugin-alias": "^0.2.1",
+    "monaco-editor": "^0.33.0",
     "reconnecting-websocket": "^4.4.0"
   },
   "dependencies": {

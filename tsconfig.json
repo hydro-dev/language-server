@@ -8,7 +8,8 @@
         "declaration": true,
         "sourceMap": true,
         "esModuleInterop": true,
-        "allowJs": false
+        "allowJs": false,
+        "jsx": "react"
     },
     "exclude": [
         "node_modules",
