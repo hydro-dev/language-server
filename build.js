@@ -9,6 +9,7 @@ esbuild.build({
     minify: true,
     entryPoints: ['./src/lsp.ts'],
     outdir: './public/',
+    format: 'iife',
     plugins: [
         alias({
             "vscode": require.resolve("@codingame/monaco-languageclient/lib/vscode-compatibility")
@@ -20,6 +21,6 @@ esbuild.build({
     fs.renameSync(`./public/lsp.js`, `./public/lsp-${hash}.js`);
     fs.writeFileSync(
         `./public/lsp-index.page.js`,
-        `window.externalModules['monaco-cpp']=window.externalModules['monaco-python']=UiContext.cdn_prefix+'lsp-${hash}.js';`
+        ['cpp', 'python', 'java'].map(i => `window.externalModules['monaco-${i}@lsp']`).join('=') + `=UiContext.cdn_prefix+'lsp-${hash}.js';`
     );
 });

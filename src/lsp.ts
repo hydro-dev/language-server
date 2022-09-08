@@ -19,7 +19,8 @@ function createWebSocket(url: string) {
 }
 
 const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const baseUrl = `${protocol}://192.168.1.223:9999/lsp/`;
+const host = window.location.host.startsWith('192.168.1.223') ? '192.168.1.223:9999' : window.location.host
+const baseUrl = `${protocol}://${host}/lsp/`;
 
 window.exports = function apply(monaco: typeof import('monaco-editor')) {
   if (window.__Hydro_lsp_loaded) return;
@@ -64,8 +65,9 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
       if (languages.includes(oldLanguage) && connected) {
         connected = false;
         webSocket.close();
+      } else if (languages.includes(model.getLanguageId()) && !connected) {
+        addModel(model);
       }
-      addModel(model);
     })
   }
 
@@ -77,5 +79,9 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
     'Cpp Language Client', ['cpp', 'c'], ['.cpp', 'cpp', '.c', 'c'],
     `${baseUrl}cpp/websocket${UserContext.formatStyle
       ? '?style=' + encodeURIComponent(UserContext.formatStyle) : ''}`
+  );
+  registerLspProvider(
+    'Java Language Client', ['java'], ['java', '.java'],
+    `${baseUrl}java/websocket`
   );
 }

@@ -2,8 +2,10 @@ import * as sockjs from 'sockjs';
 import http from 'http';
 import { launch as launchCpp } from './providers/cpp';
 import { launch as launchPython } from './providers/python';
+import { launch as launchJava } from './providers/java';
 
 const handler = (launch) => function (conn) {
+    console.log('Launching ', launch);
     const style = decodeURIComponent(conn.url.split('?style=')[1] || '');
     const server = launch({
         send: (s) => conn.write(s),
@@ -24,6 +26,10 @@ cpp.installHandlers(server);
 const python = sockjs.createServer({ prefix: '/lsp/python' });
 python.on('connection', handler(launchPython));
 python.installHandlers(server);
+
+const java = sockjs.createServer({ prefix: '/lsp/java' });
+java.on('connection', handler(launchJava));
+java.installHandlers(server);
 
 server.listen(+process.argv[1] || +process.argv[2] || 9999, '0.0.0.0', () => {
     console.log('Server listening at ' + (server.address() as any).port);
