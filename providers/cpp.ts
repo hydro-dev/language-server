@@ -45,11 +45,13 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
                         re.uri = re.uri.replace(`file://${tmpFolder}/`, 'hydro://');
                     }
                 }
-            } else if ('changes' in (message.result as any)) {
+            } else if (typeof message.result === 'object') {
                 const result = message.result as any;
-                result.changes = Object.fromEntries(Object.entries(result.changes).map(([k, v]) =>
-                    [k.replace(`file://${tmpFolder}/`, 'hydro://'), v]
-                ));
+                if (typeof result.changes === 'object') {
+                    result.changes = Object.fromEntries(Object.entries(result.changes).map(([k, v]) =>
+                        [k.replace(`file://${tmpFolder}/`, 'hydro://'), v]
+                    ));
+                }
             }
         }
         return message;
