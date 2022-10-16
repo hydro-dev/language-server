@@ -45,7 +45,7 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
                         re.uri = re.uri.replace(`file://${tmpFolder}/`, 'hydro://');
                     }
                 }
-            } else if (typeof message.result === 'object') {
+            } else if (typeof message.result === 'object' && message.result !== null) {
                 const result = message.result as any;
                 if (typeof result.changes === 'object') {
                     result.changes = Object.fromEntries(Object.entries(result.changes).map(([k, v]) =>
