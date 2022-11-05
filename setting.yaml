@@ -10,3 +10,5 @@ formatStyle:
     AllowShortBlocksOnASingleLine: true
     AllowShortIfStatementsOnASingleLine: true
     AllowShortLoopsOnASingleLine: true
+endpoint:
+  type: text

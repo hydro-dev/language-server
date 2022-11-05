@@ -19,7 +19,7 @@ function createWebSocket(url: string) {
 }
 
 const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const host = window.location.host.startsWith('192.168.1.223') ? '192.168.1.223:9999' : window.location.host
+const host = (window as any).UiContext.lspHost || window.location.host;
 const baseUrl = `${protocol}://${host}/lsp/`;
 
 window.exports = function apply(monaco: typeof import('monaco-editor')) {
@@ -28,13 +28,13 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
   MonacoServices.install(monaco);
 
   function registerLspProvider(name: string, languages: string[], documentSelector: string[], url: string) {
-    let webSocket = null;
-    let connected = false;
+    let webSocket: ReconnectingWebSocket = null;
+    const connected = () => webSocket && webSocket?.readyState === webSocket?.OPEN;
     function addModel(model: editor.IModel) {
-      if (!languages.includes(model.getLanguageId().toLowerCase()) || connected) return;
+      if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
       webSocket = createWebSocket(url);
       listen({
-        webSocket,
+        webSocket: webSocket as any,
         onConnection: (connection) => {
           const languageClient = new MonacoLanguageClient({
             name,
@@ -49,24 +49,39 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
               get: (errorHandler, closeHandler) => Promise.resolve(createConnection(connection, errorHandler, closeHandler)),
             },
           });
-          const disposable = languageClient.start();
-          connection.onClose(() => disposable.dispose());
+          languageClient.start();
+          webSocket.onclose = async () => {
+            await languageClient.stop();
+            connection.end();
+          }
         },
       });
     }
     monaco.editor.onDidCreateModel(addModel);
     monaco.editor.onWillDisposeModel((model) => {
-      if (languages.includes(model.getLanguageId().toLowerCase()) && connected) {
-        connected = false;
+      if (languages.includes(model.getLanguageId().toLowerCase()) && connected()) {
         webSocket.close();
       }
     });
     monaco.editor.onDidChangeModelLanguage(({ model, oldLanguage }) => {
-      if (languages.includes(oldLanguage) && connected) {
-        connected = false;
+      if (languages.includes(oldLanguage) && connected()) {
         webSocket.close();
-      } else if (languages.includes(model.getLanguageId()) && !connected) {
+      } else if (languages.includes(model.getLanguageId()) && !connected()) {
         addModel(model);
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && webSocket) {
+        if (!connected()) {
+          console.log('Resume language server');
+          webSocket.reconnect();
+        }
+      } else {
+        if (connected()) {
+          console.log('Pause language server');
+          webSocket.close();
+        }
       }
     })
   }
