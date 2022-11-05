@@ -30,6 +30,7 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
             if (message.method === lsp.InitializeRequest.type.method) {
                 params.processId = process.pid;
             }
+            if (!params) return message;
             if (params.textDocument?.uri?.startsWith('hydro://')) {
                 params.textDocument.uri = params.textDocument.uri.replace('hydro://', `file://${tmpFolder}/`);
             }
