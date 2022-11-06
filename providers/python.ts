@@ -19,6 +19,7 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
     server.forward(socketConnection, serverConnection, (message) => {
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;
+            if (!params) return message;
             if (message.method === lsp.InitializeRequest.type.method) {
                 params.processId = process.pid;
             }
