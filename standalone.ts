@@ -8,7 +8,7 @@ const handler = (launch) => function (conn) {
     console.log('Launching ', launch);
     let args = {};
     if (conn.url.includes('?style=')) {
-        args = { style: decodeURIComponent(conn.url.split('?style=')) };
+        args = { style: decodeURIComponent(conn.url.split('?style=')[1]) };
     } else {
         args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
     }
