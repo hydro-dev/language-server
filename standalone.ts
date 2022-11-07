@@ -6,8 +6,12 @@ import { launch as launchJava } from './providers/java';
 
 const handler = (launch) => function (conn) {
     console.log('Launching ', launch);
-    const qs = decodeURIComponent(conn.url.split('?')[1] || '');
-    const args = (qs && qs[0] !== '{') ? { style: qs } : JSON.parse(qs || '{}') || {};
+    let args = {};
+    if (conn.url.includes('?style=')) {
+        args = { style: decodeURIComponent(conn.url.split('?style=')) };
+    } else {
+        args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
+    }
     const server = launch({
         send: (s) => conn.write(s),
         onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
