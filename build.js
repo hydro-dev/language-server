@@ -21,6 +21,6 @@ esbuild.build({
     fs.renameSync(`./public/lsp.js`, `./public/lsp-${hash}.js`);
     fs.writeFileSync(
         `./public/lsp-index.page.js`,
-        ['cpp', 'python', 'java'].map(i => `window.externalModules['monaco-${i}@lsp']`).join('=') + `=UiContext.cdn_prefix+'lsp-${hash}.js';`
+        ['cpp', 'c', 'python', 'java'].map(i => `window.externalModules['monaco-${i}@lsp']`).join('=') + `=UiContext.cdn_prefix+'lsp-${hash}.js';`
     );
 });
