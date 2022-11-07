@@ -24,7 +24,9 @@ export function launch(socket: rpc.IWebSocket, { style }) {
         '--limit-results=20',
     ], { cwd: tmpFolder });
     serverConnection.onClose(() => removeSync(tmpFolder));
+    const folders = [];
     server.forward(socketConnection, serverConnection, (message) => {
+        const pendingFolder = new Set<string>();
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;
             if (message.method === lsp.InitializeRequest.type.method) {
@@ -32,9 +34,11 @@ export function launch(socket: rpc.IWebSocket, { style }) {
             }
             if (!params) return message;
             if (params.textDocument?.uri?.startsWith('hydro://')) {
+                pendingFolder.add(params.textDocument.uri.split('://')[1]);
                 params.textDocument.uri = params.textDocument.uri.replace('hydro://', `file://${tmpFolder}/`);
             }
             if (params.uri?.startsWith('hydro://')) {
+                pendingFolder.add(params.uri.split('://')[1]);
                 params.uri = params.uri.replace('hydro://', `file://${tmpFolder}/`);
             } else if (params.uri?.startsWith(`file://${tmpFolder}/`)) {
                 params.uri = params.uri.replace(`file://${tmpFolder}/`, 'hydro://');
@@ -53,6 +57,11 @@ export function launch(socket: rpc.IWebSocket, { style }) {
                         [k.replace(`file://${tmpFolder}/`, 'hydro://'), v]
                     ));
                 }
+            }
+        }
+        for (const f of pendingFolder) {
+            if (!folders.includes(f) && !f.includes('..')) {
+                ensureDirSync(join(tmpFolder, f));
             }
         }
         return message;
