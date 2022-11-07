@@ -18,9 +18,10 @@ function createWebSocket(url: string) {
   return new ReconnectingWebSocket(url, [], socketOptions);
 }
 
-const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-const host = (window as any).UiContext.lspHost || window.location.host;
-const baseUrl = `${protocol}://${host}/lsp/`;
+const endpoint = (window as any).UiContext.lspHost
+  || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+if (endpoint === 'wss://hydro.ac') console.log('Using language server provided by https://hydro.ac');
+const baseUrl = `${endpoint}/lsp/`;
 
 window.exports = function apply(monaco: typeof import('monaco-editor')) {
   if (window.__Hydro_lsp_loaded) return;

@@ -13,7 +13,7 @@ export function apply(ctx: Context) {
         configurable: true,
         enumerable: true,
         get() {
-            return SystemModel.get('language-server.host') || 'hydro.ac';
+            return SystemModel.get('language-server.host') || 'wss://hydro.ac';
         },
     });
     ctx.on('dispose', () => {
