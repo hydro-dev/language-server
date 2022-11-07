@@ -28,12 +28,15 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
   window.__Hydro_lsp_loaded = true;
   MonacoServices.install(monaco);
 
-  function registerLspProvider(name: string, languages: string[], documentSelector: string[], url: string) {
+  function registerLspProvider(
+    name: string, languages: string[], documentSelector: string[],
+    url: string, args: (model: editor.IModel) => any = () => ({}),
+  ) {
     let webSocket: ReconnectingWebSocket = null;
     const connected = () => webSocket && webSocket?.readyState === webSocket?.OPEN;
     function addModel(model: editor.IModel) {
       if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
-      webSocket = createWebSocket(url);
+      webSocket = createWebSocket(url + '?' + encodeURIComponent(JSON.stringify(args(model))));
       listen({
         webSocket: webSocket as any,
         onConnection: (connection) => {
@@ -93,8 +96,10 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
   );
   registerLspProvider(
     'Cpp Language Client', ['cpp', 'c'], ['.cpp', 'cpp', '.c', 'c'],
-    `${baseUrl}cpp/websocket${UserContext.formatStyle
-      ? '?style=' + encodeURIComponent(UserContext.formatStyle) : ''}`
+    `${baseUrl}cpp/websocket`, (model) => ({
+      style: UserContext.formatStyle,
+      lang: model.getLanguageId() === 'c' ? 'c' : 'c++',
+    }),
   );
   registerLspProvider(
     'Java Language Client', ['java'], ['java', '.java'],

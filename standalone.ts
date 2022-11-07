@@ -6,14 +6,15 @@ import { launch as launchJava } from './providers/java';
 
 const handler = (launch) => function (conn) {
     console.log('Launching ', launch);
-    const style = decodeURIComponent(conn.url.split('?style=')[1] || '');
+    const qs = decodeURIComponent(conn.url.split('?')[1] || '');
+    const args = (qs && qs[0] !== '{') ? { style: qs } : JSON.parse(qs || '{}') || {};
     const server = launch({
         send: (s) => conn.write(s),
         onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
         onClose: (cb) => conn.on('close', (res, reason) => cb(res, reason)),
         onError: (cb) => conn.on('error', (err) => cb(err)),
         dispose: () => conn.close('3000', 'disposed'),
-    }, style);
+    }, args);
     conn.on('close', () => server.dispose());
 }
 

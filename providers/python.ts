@@ -5,7 +5,7 @@ import * as server from '@codingame/monaco-jsonrpc/lib/server';
 
 ensureDirSync('/tmp/pylsp');
 
-export function launch(socket: rpc.IWebSocket, style?: string) {
+export function launch(socket: rpc.IWebSocket) {
     const reader = new rpc.WebSocketMessageReader(socket);
     const writer = new rpc.WebSocketMessageWriter(socket);
     const socketConnection = server.createConnection(reader, writer, () => socket.dispose());

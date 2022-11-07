@@ -6,7 +6,7 @@ import { join } from 'path';
 
 ensureDirSync('/tmp/clangd');
 
-export function launch(socket: rpc.IWebSocket, style?: string) {
+export function launch(socket: rpc.IWebSocket, { style, lang }) {
     const reader = new rpc.WebSocketMessageReader(socket);
     const writer = new rpc.WebSocketMessageWriter(socket);
     const socketConnection = server.createConnection(reader, writer, () => socket.dispose());
@@ -22,6 +22,7 @@ export function launch(socket: rpc.IWebSocket, style?: string) {
         '--log=error',
         '--header-insertion-decorators',
         '--limit-results=20',
+        `--language=${lang === 'c' ? 'c' : 'c++'}`,
     ], { cwd: tmpFolder });
     serverConnection.onClose(() => removeSync(tmpFolder));
     server.forward(socketConnection, serverConnection, (message) => {
