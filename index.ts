@@ -1,4 +1,4 @@
-import { Context, UiContextBase, SystemModel } from 'hydrooj';
+import { Context, SystemModel, UiContextBase } from 'hydrooj';
 
 declare module 'hydrooj' {
     interface UiContextBase {

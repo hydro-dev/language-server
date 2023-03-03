@@ -1,21 +1,21 @@
 import * as rpc from '@codingame/monaco-jsonrpc';
-import { ensureDirSync, removeSync } from 'fs-extra';
-import * as lsp from 'vscode-languageserver';
 import * as server from '@codingame/monaco-jsonrpc/lib/server';
+import { fs } from '@hydrooj/utils';
+import * as lsp from 'vscode-languageserver';
 
-ensureDirSync('/tmp/pylsp');
+fs.ensureDirSync('/tmp/pylsp');
 
 export function launch(socket: rpc.IWebSocket) {
     const reader = new rpc.WebSocketMessageReader(socket);
     const writer = new rpc.WebSocketMessageWriter(socket);
     const socketConnection = server.createConnection(reader, writer, () => socket.dispose());
     const id = Math.random().toString(36).replace(/[^a-z0-9]+/g, '');
-    const tmpFolder = '/tmp/pylsp/' + id;
-    ensureDirSync(tmpFolder);
+    const tmpFolder = `/tmp/pylsp/${id}`;
+    fs.ensureDirSync(tmpFolder);
     const serverConnection = server.createServerProcess('pylsp', 'pylsp', [
-        '--log-file=/dev/null'
+        '--log-file=/dev/null',
     ], { cwd: tmpFolder });
-    serverConnection.onClose(() => removeSync(tmpFolder));
+    serverConnection.onClose(() => fs.removeSync(tmpFolder));
     server.forward(socketConnection, serverConnection, (message) => {
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;

@@ -1,2 +1,2 @@
-declare var UserContext: any;
-declare var __Hydro_lsp_loaded: boolean;
+declare let UserContext: any;
+declare let __Hydro_lsp_loaded: boolean;

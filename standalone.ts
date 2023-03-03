@@ -1,8 +1,8 @@
-import * as sockjs from 'sockjs';
 import http from 'http';
+import * as sockjs from 'sockjs';
 import { launch as launchCpp } from './providers/cpp';
-import { launch as launchPython } from './providers/python';
 import { launch as launchJava } from './providers/java';
+import { launch as launchPython } from './providers/python';
 
 const handler = (launch) => function (conn) {
     console.log('Launching ', launch);
@@ -20,7 +20,7 @@ const handler = (launch) => function (conn) {
         dispose: () => conn.close('3000', 'disposed'),
     }, args);
     conn.on('close', () => server.dispose());
-}
+};
 
 const server = http.createServer();
 
@@ -37,5 +37,5 @@ java.on('connection', handler(launchJava));
 java.installHandlers(server);
 
 server.listen(+process.argv[1] || +process.argv[2] || 9999, '0.0.0.0', () => {
-    console.log('Server listening at ' + (server.address() as any).port);
+    console.log(`Server listening at ${(server.address() as any).port}`);
 });
