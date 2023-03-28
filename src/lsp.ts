@@ -1,26 +1,13 @@
 import { listen } from '@codingame/monaco-jsonrpc';
 import {
-    CloseAction, createConnection,
-    ErrorAction,
+    CloseAction, createConnection, ErrorAction,
     MonacoLanguageClient, MonacoServices,
 } from '@codingame/monaco-languageclient';
+import { Socket } from '@hydrooj/ui-default';
 import type { editor } from 'monaco-editor';
-import ReconnectingWebSocket from 'reconnecting-websocket';
-
-function createWebSocket(url: string) {
-    const socketOptions = {
-        maxReconnectionDelay: 10000,
-        minReconnectionDelay: 1000,
-        reconnectionDelayGrowFactor: 1.3,
-        connectionTimeout: 10000,
-        maxRetries: Infinity,
-        debug: false,
-    };
-    return new ReconnectingWebSocket(url, [], socketOptions);
-}
 
 const endpoint = (window as any).UiContext.lspHost
-  || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+    || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
 if (endpoint === 'wss://hydro.ac') console.log('Using language server provided by https://hydro.ac');
 const baseUrl = `${endpoint}/lsp/`;
 
@@ -33,11 +20,11 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
         name: string, languages: string[], documentSelector: string[],
         url: string, args: (model: editor.IModel) => any = () => ({}),
     ) {
-        let webSocket: ReconnectingWebSocket = null;
+        let webSocket: Socket['sock'] = null;
         const connected = () => webSocket && webSocket?.readyState === webSocket?.OPEN;
         function addModel(model: editor.IModel) {
             if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
-            webSocket = createWebSocket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`);
+            webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`).sock;
             listen({
                 webSocket: webSocket as any,
                 onConnection: (connection) => {

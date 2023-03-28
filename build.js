@@ -4,6 +4,20 @@ const fs = require('fs-extra');
 const crypto = require('crypto');
 
 fs.emptyDirSync('public');
+
+const federationPlugin = {
+    name: 'federation',
+    setup(b) {
+        b.onResolve({ filter: /^@hydrooj\/ui-default/ }, () => ({
+            path: 'api',
+            namespace: 'ui-default',
+        }));
+        b.onLoad({ filter: /.*/, namespace: 'ui-default' }, () => ({
+            contents: 'module.exports = window.HydroExports;',
+            loader: 'tsx',
+        }));
+    },
+};
 esbuild.build({
     bundle: true,
     minify: true,
@@ -14,6 +28,7 @@ esbuild.build({
         alias({
             vscode: require.resolve('@codingame/monaco-languageclient/lib/vscode-compatibility'),
         }),
+        federationPlugin,
     ],
 }).then(() => {
     const data = fs.readFileSync('./public/lsp.js', 'utf8');

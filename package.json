@@ -16,8 +16,7 @@
     "@types/sockjs": "^0.3.33",
     "esbuild": "^0.17.10",
     "esbuild-plugin-alias": "^0.2.1",
-    "monaco-editor": "^0.36.1",
-    "reconnecting-websocket": "^4.4.0"
+    "monaco-editor": "^0.36.1"
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "^0.3.1",
