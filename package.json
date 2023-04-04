@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "^0.3.1",
-    "@hydrooj/utils": "^1.4.1",
+    "@hydrooj/utils": "^1.4.11",
     "js-yaml": "^4.1.0",
     "sockjs": "^0.3.24",
     "vscode-languageserver": "^7.0.0"
