@@ -33,7 +33,7 @@ export function launch(socket: rpc.IWebSocket) {
         '--add-opens',
         'java.base/java.lang=ALL-UNNAMED',
         '-jar',
-        `${basedir}/jdt/plugins/${files.find((i) => i.includes('launcher') && i.endsWith('.jar'))}`,
+        `${basedir}/jdt/plugins/${files.find((i) => i.includes('equinox.launcher_') && i.endsWith('.jar'))}`,
         '-configuration',
         '/root/.cache/jdtls',
         '-data',
