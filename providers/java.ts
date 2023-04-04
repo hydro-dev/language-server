@@ -52,20 +52,20 @@ export function launch(socket: rpc.IWebSocket) {
         lastEvent = Date.now();
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;
-            if (message.method === lsp.InitializeRequest.type.method) {
+            if (params && message.method === lsp.InitializeRequest.type.method) {
                 params.processId = process.pid;
             }
-            if (params.textDocument?.uri?.startsWith('hydro://')) {
+            if (params?.textDocument?.uri?.startsWith('hydro://')) {
                 filename = params.textDocument.uri;
                 params.textDocument.uri = `file://${tmpFolder}/Main.java`;
                 if (params.textDocument.text) {
                     fs.writeFileSync(`${tmpFolder}/Main.java`, params.textDocument.text);
                 }
             }
-            if (params.uri?.startsWith('hydro://')) {
+            if (params?.uri?.startsWith('hydro://')) {
                 filename = params.uri;
                 params.uri = `file://${tmpFolder}/Main.java`;
-            } else if (params.uri?.startsWith(`file://${tmpFolder}/Main.java`)) {
+            } else if (params?.uri?.startsWith(`file://${tmpFolder}/Main.java`)) {
                 params.uri = filename;
             }
         } else if (rpc.isResponseMessage(message)) {
