@@ -21,11 +21,11 @@ export function apply(monaco: typeof import('monaco-editor')) {
         name: string, languages: string[], documentSelector: string[],
         url: string, args: (model: editor.IModel) => any = () => ({}),
     ) {
-        let webSocket: Socket['sock'] = null;
-        const connected = () => webSocket && webSocket?.readyState === webSocket?.OPEN;
+        let webSocket: Socket;
+        const connected = () => webSocket && webSocket?.sock.readyState === webSocket?.sock.OPEN;
         function addModel(model: editor.IModel) {
             if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
-            webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`, true).sock;
+            webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`, true);
             listen({
                 webSocket: webSocket as any,
                 onConnection: (connection) => {
@@ -69,13 +69,13 @@ export function apply(monaco: typeof import('monaco-editor')) {
             if (document.visibilityState === 'visible' && webSocket) {
                 if (!connected()) {
                     console.log('Resume language server');
-                    webSocket.reconnect();
+                    webSocket.sock.reconnect();
                 }
             } else if (document.visibilityState === 'hidden' && connected()) {
                 setTimeout(() => {
                     if (document.visibilityState === 'hidden' && connected()) {
                         console.log('Pause language server');
-                        webSocket.close();
+                        webSocket.sock.close();
                     }
                 }, 30000);
             }
