@@ -10,10 +10,11 @@ const endpoint = (window as any).UiContext.lspHost
     || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
 if (endpoint === 'wss://hydro.ac') console.log('Using language server provided by https://hydro.ac');
 const baseUrl = `${endpoint}/lsp/`;
+let loaded = false;
 
-window.exports = function apply(monaco: typeof import('monaco-editor')) {
-    if (window.__Hydro_lsp_loaded) return;
-    window.__Hydro_lsp_loaded = true;
+export function apply(monaco: typeof import('monaco-editor')) {
+    if (loaded) return;
+    loaded = true;
     MonacoServices.install(monaco);
 
     function registerLspProvider(
@@ -24,7 +25,7 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
         const connected = () => webSocket && webSocket?.readyState === webSocket?.OPEN;
         function addModel(model: editor.IModel) {
             if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
-            webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`).sock;
+            webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`, true).sock;
             listen({
                 webSocket: webSocket as any,
                 onConnection: (connection) => {
@@ -70,7 +71,7 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
                     console.log('Resume language server');
                     webSocket.reconnect();
                 }
-            } else if (connected()) {
+            } else if (document.visibilityState === 'hidden' && connected()) {
                 setTimeout(() => {
                     if (document.visibilityState === 'hidden' && connected()) {
                         console.log('Pause language server');
@@ -96,4 +97,4 @@ window.exports = function apply(monaco: typeof import('monaco-editor')) {
         'Java Language Client', ['java'], ['java', '.java'],
         `${baseUrl}java/websocket`,
     );
-};
+}

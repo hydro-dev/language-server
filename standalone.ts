@@ -5,21 +5,25 @@ import { launch as launchJava } from './providers/java';
 import { launch as launchPython } from './providers/python';
 
 const handler = (launch) => function (conn) {
-    console.log('Launching ', launch);
-    let args = {};
-    if (conn.url.includes('?style=')) {
-        args = { style: decodeURIComponent(conn.url.split('?style=')[1]) };
-    } else {
-        args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
+    try {
+        console.log('Launching ', launch);
+        let args = {};
+        if (conn.url.includes('?style=')) {
+            args = { style: decodeURIComponent(conn.url.split('?style=')[1]) };
+        } else {
+            args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
+        }
+        const server = launch({
+            send: (s) => conn.write(s),
+            onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
+            onClose: (cb) => conn.on('close', (res, reason) => cb(res, reason)),
+            onError: (cb) => conn.on('error', (err) => cb(err)),
+            dispose: () => conn.close('3000', 'disposed'),
+        }, args);
+        conn.on('close', () => server.dispose());
+    } catch (e) {
+        console.error(e);
     }
-    const server = launch({
-        send: (s) => conn.write(s),
-        onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
-        onClose: (cb) => conn.on('close', (res, reason) => cb(res, reason)),
-        onError: (cb) => conn.on('error', (err) => cb(err)),
-        dispose: () => conn.close('3000', 'disposed'),
-    }, args);
-    conn.on('close', () => server.dispose());
 };
 
 const server = http.createServer();
