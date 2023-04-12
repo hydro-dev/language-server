@@ -16,12 +16,15 @@
     "monaco-editor": "^0.37.1"
   },
   "dependencies": {
-    "@codingame/monaco-jsonrpc": "^0.3.1",
+    "@codingame/monaco-jsonrpc": "0.3.1",
     "@codingame/monaco-languageclient": "0.17.4",
     "@hydrooj/utils": "^1.4.11",
     "esbuild-plugin-alias": "^0.2.1",
     "js-yaml": "^4.1.0",
     "sockjs": "^0.3.24",
-    "vscode-languageserver": "^8.1.0"
+    "vscode-languageserver": "7.0.0"
+  },
+  "resolutions": {
+    "vscode-languageserver": "7.0.0"
   }
 }
