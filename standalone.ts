@@ -15,7 +15,15 @@ const handler = (launch) => function (conn) {
         }
         const server = launch({
             send: (s) => conn.write(s),
-            onMessage: (cb) => conn.on('data', (msg) => cb(msg)),
+            onMessage: (cb) => conn.on('data', (msg) => {
+                if (msg?.trim() === 'ping') conn.write('pong');
+                else {
+                    try {
+                        JSON.parse(msg);
+                        cb(msg);
+                    } catch (e) { }
+                }
+            }),
             onClose: (cb) => conn.on('close', (res, reason) => cb(res, reason)),
             onError: (cb) => conn.on('error', (err) => cb(err)),
             dispose: () => conn.close('3000', 'disposed'),
