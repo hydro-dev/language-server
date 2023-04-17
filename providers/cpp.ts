@@ -24,16 +24,10 @@ export function launch(socket: rpc.IWebSocket, { style }) {
         '--limit-results=20',
     ], { cwd: tmpFolder });
     const folders: string[] = [];
-    let lastEvent = Date.now();
-    const interval = setInterval(() => {
-        if (Date.now() - lastEvent > 60000) serverConnection.dispose();
-    }, 30000);
     serverConnection.onClose(() => {
         fs.removeSync(tmpFolder);
-        clearInterval(interval);
     });
     server.forward(socketConnection, serverConnection, (message) => {
-        lastEvent = Date.now();
         const pendingFolder = new Set<string>();
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;

@@ -5,6 +5,8 @@ import { launch as launchJava } from './providers/java';
 import { launch as launchPython } from './providers/python';
 
 const handler = (launch) => function (conn) {
+    let lastEvent = Date.now();
+    let interval;
     try {
         console.log('Launching ', launch, conn.url);
         let args = {};
@@ -16,6 +18,7 @@ const handler = (launch) => function (conn) {
         const server = launch({
             send: (s) => conn.write(s),
             onMessage: (cb) => conn.on('data', (msg) => {
+                lastEvent = Date.now();
                 if (msg?.trim() === 'pong') return;
                 if (msg?.trim() === 'ping') conn.write('pong');
                 else {
@@ -29,7 +32,16 @@ const handler = (launch) => function (conn) {
             onError: (cb) => conn.on('error', (err) => cb(err)),
             dispose: () => conn.close('3000', 'disposed'),
         }, args);
-        conn.on('close', () => server.dispose());
+        const gc = () => {
+            if (interval) clearInterval(interval);
+            interval = null;
+            conn.close();
+            server.dispose();
+        };
+        interval = setInterval(() => {
+            if (Date.now() - lastEvent > 60000) gc();
+        }, 30000);
+        conn.on('close', gc);
     } catch (e) {
         console.error(e);
     }

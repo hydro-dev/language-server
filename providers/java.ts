@@ -40,16 +40,10 @@ export function launch(socket: rpc.IWebSocket) {
         '/root/.cache/jdtls-data',
     ], { cwd: tmpFolder });
     let filename = '';
-    let lastEvent = Date.now();
-    const interval = setInterval(() => {
-        if (Date.now() - lastEvent > 60000) serverConnection.dispose();
-    }, 30000);
     serverConnection.onClose(() => {
         fs.removeSync(tmpFolder);
-        clearInterval(interval);
     });
     server.forward(socketConnection, serverConnection, (message) => {
-        lastEvent = Date.now();
         if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
             const params = message.params as any;
             if (params && message.method === lsp.InitializeRequest.type.method) {
