@@ -31,11 +31,10 @@ export function launch(socket: rpc.IWebSocket) {
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
         '-jar', `${basedir}/jdt/plugins/${files.find((i) => i.includes('equinox.launcher_') && i.endsWith('.jar'))}`,
         '-configuration', `${basedir}/jdt/config_linux`,
-        '-data', '/root/.cache/jdtls-data',
+        '-data', tmpFolder,
     ], { cwd: tmpFolder });
     let filename = '';
     serverConnection.onClose(() => {
-        console.log('jdtls closed');
         fs.removeSync(tmpFolder);
     });
     server.forward(socketConnection, serverConnection, (message) => {
