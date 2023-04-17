@@ -25,7 +25,6 @@ export function launch(socket: rpc.IWebSocket) {
         `-Dosgi.sharedConfiguration.area=${basedir}/jdt/config_linux`,
         '-Dosgi.sharedConfiguration.area.readOnly=true',
         '-Dosgi.configuration.cascaded=true',
-        '-noverify',
         '-Xms512M',
         '--add-modules=ALL-SYSTEM',
         '--add-opens',
@@ -41,6 +40,7 @@ export function launch(socket: rpc.IWebSocket) {
     ], { cwd: tmpFolder });
     let filename = '';
     serverConnection.onClose(() => {
+        console.log('jdtls closed');
         fs.removeSync(tmpFolder);
     });
     server.forward(socketConnection, serverConnection, (message) => {

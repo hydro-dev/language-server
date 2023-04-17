@@ -16,9 +16,8 @@ export function launch(socket: rpc.IWebSocket, { style }) {
     if (style) fs.writeFileSync(join(tmpFolder, '.clang-format'), style.replace(/\r/g, ''));
     const serverConnection = server.createServerProcess('clangd', 'clangd', [
         '--pch-storage=memory',
-        '--recovery-ast',
+        '-j=1',
         '--clang-tidy',
-        '--suggest-missing-includes',
         '--log=error',
         '--header-insertion-decorators',
         '--limit-results=20',
