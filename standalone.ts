@@ -6,7 +6,7 @@ import { launch as launchPython } from './providers/python';
 
 const handler = (launch) => function (conn) {
     try {
-        console.log('Launching ', launch);
+        console.log('Launching ', launch, conn.url);
         let args = {};
         if (conn.url.includes('?style=')) {
             args = { style: decodeURIComponent(conn.url.split('?style=')[1]) };
@@ -16,6 +16,7 @@ const handler = (launch) => function (conn) {
         const server = launch({
             send: (s) => conn.write(s),
             onMessage: (cb) => conn.on('data', (msg) => {
+                if (msg?.trim() === 'pong') return;
                 if (msg?.trim() === 'ping') conn.write('pong');
                 else {
                     try {
