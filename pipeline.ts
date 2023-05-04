@@ -24,19 +24,25 @@ export function getPipeline(tmpFolder: string, folders = []) {
             if (message.method === lsp.InitializeRequest.type.method) {
                 params.processId = process.pid;
             }
-            if (params.textDocument?.uri?.endsWith('.java') && params.textDocument.text) {
-                forceUri = params.textDocument.uri;
-                fs.writeFileSync(`${tmpFolder}/Main.java`, params.textDocument.text);
-                params.textDocument.uri = `file://${tmpFolder}/Main.java`;
-            } else if (params.textDocument?.uri?.startsWith('hydro:')) {
-                pendingFolder.add(removeHydroPrefix(params.textDocument.uri));
-                params.textDocument.uri = removeHydroPrefix(params.textDocument.uri, `file://${tmpFolder}/`);
+            if (params.textDocument?.uri?.startsWith('hydro:')) {
+                if (params.textDocument?.uri?.endsWith('.java')) {
+                    forceUri = params.textDocument.uri;
+                    params.textDocument.uri = `file://${tmpFolder}/Main.java`;
+                    if (params.textDocument.text) {
+                        fs.writeFileSync(`${tmpFolder}/Main.java`, params.textDocument.text);
+                    }
+                } else {
+                    pendingFolder.add(removeHydroPrefix(params.textDocument.uri));
+                    params.textDocument.uri = removeHydroPrefix(params.textDocument.uri, `file://${tmpFolder}/`);
+                }
             }
-            if (params.uri?.endsWith('.java')) {
-                params.uri = `file://${tmpFolder}/Main.java`;
-            } else if (params.uri?.startsWith('hydro:')) {
-                pendingFolder.add(removeHydroPrefix(params.uri));
-                params.uri = removeHydroPrefix(params.uri, `file://${tmpFolder}/`);
+            if (params.uri?.startsWith('hydro:')) {
+                if (params.uri?.endsWith('.java')) {
+                    params.uri = `file://${tmpFolder}/Main.java`;
+                } else {
+                    pendingFolder.add(removeHydroPrefix(params.uri));
+                    params.uri = removeHydroPrefix(params.uri, `file://${tmpFolder}/`);
+                }
             } else if (params.uri?.startsWith(`file://${tmpFolder}/`)) {
                 params.uri = forceUri || params.uri.replace(`file://${tmpFolder}/`, slashStyle ? 'hydro://' : 'hydro:');
             }
