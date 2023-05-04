@@ -1,7 +1,7 @@
 import * as rpc from '@codingame/monaco-jsonrpc';
 import * as server from '@codingame/monaco-jsonrpc/lib/server';
 import { fs } from '@hydrooj/utils';
-import * as lsp from 'vscode-languageserver';
+import { getPipeline } from '../pipeline';
 
 fs.ensureDirSync('/tmp/pylsp');
 
@@ -18,31 +18,6 @@ export function launch(socket: rpc.IWebSocket) {
     serverConnection.onClose(() => {
         fs.removeSync(tmpFolder);
     });
-    server.forward(socketConnection, serverConnection, (message) => {
-        if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
-            const params = message.params as any;
-            if (!params) return message;
-            if (message.method === lsp.InitializeRequest.type.method) {
-                params.processId = process.pid;
-            }
-            if (params.textDocument?.uri?.startsWith('hydro://')) {
-                params.textDocument.uri = params.textDocument.uri.replace('hydro://', `file://${tmpFolder}/`);
-            }
-            if (params.uri?.startsWith('hydro://')) {
-                params.uri = params.uri.replace('hydro://', `file://${tmpFolder}/`);
-            } else if (params.uri?.startsWith(`file://${tmpFolder}/`)) {
-                params.uri = params.uri.replace(`file://${tmpFolder}/`, 'hydro://');
-            }
-        } else if (rpc.isResponseMessage(message)) {
-            if (message.result instanceof Array) {
-                for (const re of message.result) {
-                    if (re.uri?.startsWith(`file://${tmpFolder}/`)) {
-                        re.uri = re.uri.replace(`file://${tmpFolder}/`, 'hydro://');
-                    }
-                }
-            }
-        }
-        return message;
-    });
+    server.forward(socketConnection, serverConnection, getPipeline(tmpFolder));
     return serverConnection;
 }

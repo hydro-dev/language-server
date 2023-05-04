@@ -2,7 +2,7 @@ import path from 'path';
 import * as rpc from '@codingame/monaco-jsonrpc';
 import * as server from '@codingame/monaco-jsonrpc/lib/server';
 import { fs } from '@hydrooj/utils';
-import * as lsp from 'vscode-languageserver';
+import { getPipeline } from '../pipeline';
 
 fs.ensureDirSync('/tmp/javalsp');
 
@@ -33,39 +33,9 @@ export function launch(socket: rpc.IWebSocket) {
         '-configuration', `${basedir}/jdt/config_linux`,
         '-data', tmpFolder,
     ], { cwd: tmpFolder });
-    let filename = '';
     serverConnection.onClose(() => {
         fs.removeSync(tmpFolder);
     });
-    server.forward(socketConnection, serverConnection, (message) => {
-        if (rpc.isRequestMessage(message) || rpc.isNotificationMessage(message)) {
-            const params = message.params as any;
-            if (params && message.method === lsp.InitializeRequest.type.method) {
-                params.processId = process.pid;
-            }
-            if (params?.textDocument?.uri?.startsWith('hydro://')) {
-                filename = params.textDocument.uri;
-                params.textDocument.uri = `file://${tmpFolder}/Main.java`;
-                if (params.textDocument.text) {
-                    fs.writeFileSync(`${tmpFolder}/Main.java`, params.textDocument.text);
-                }
-            }
-            if (params?.uri?.startsWith('hydro://')) {
-                filename = params.uri;
-                params.uri = `file://${tmpFolder}/Main.java`;
-            } else if (params?.uri?.startsWith(`file://${tmpFolder}/Main.java`)) {
-                params.uri = filename;
-            }
-        } else if (rpc.isResponseMessage(message)) {
-            if (message.result instanceof Array) {
-                for (const re of message.result) {
-                    if (re?.uri?.startsWith(`file://${tmpFolder}/Main.java`)) {
-                        re.uri = filename;
-                    }
-                }
-            }
-        }
-        return message;
-    });
+    server.forward(socketConnection, serverConnection, getPipeline(tmpFolder));
     return serverConnection;
 }
