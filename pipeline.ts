@@ -1,4 +1,4 @@
-import { join } from 'path';
+import { dirname, join } from 'path';
 import * as rpc from '@codingame/monaco-jsonrpc';
 import { fs } from '@hydrooj/utils';
 import * as lsp from 'vscode-languageserver';
@@ -55,7 +55,7 @@ export function getPipeline(tmpFolder: string, folders = []) {
         }
         for (const f of pendingFolder) {
             if (!folders.includes(f) && !f.includes('..')) {
-                fs.ensureDirSync(join(tmpFolder, f));
+                fs.ensureDirSync(dirname(join(tmpFolder, f)));
             }
         }
         return message;
