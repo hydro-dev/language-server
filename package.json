@@ -10,10 +10,10 @@
     "build": "node build.js"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.5",
-    "@types/node": "^18.14.1",
-    "@types/sockjs": "^0.3.33",
-    "monaco-editor": "^0.37.1"
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.10.4",
+    "@types/sockjs": "^0.3.36",
+    "monaco-editor": "^0.45.0"
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "0.3.1",
