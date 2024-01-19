@@ -64,14 +64,21 @@ export function apply(monaco: typeof import('monaco-editor')) {
             }
         });
 
+        let t: NodeJS.Timeout | null = null;
         document.addEventListener('visibilitychange', () => {
             if (!webSocket) return;
             // FIXME Alt-Tab will temporarily make the visibilityState to visible
             if (document.visibilityState === 'visible' && !connected()) {
-                console.log('Resume language server');
-                webSocket.sock.reconnect();
+                if (t) clearTimeout(t);
+                t = setTimeout(() => {
+                    if (document.visibilityState === 'visible' && !connected()) {
+                        console.log('Resume language server');
+                        webSocket.sock.reconnect();
+                    }
+                }, 5000);
             } else if (document.visibilityState === 'hidden' && connected()) {
-                setTimeout(() => {
+                if (t) clearTimeout(t);
+                t = setTimeout(() => {
                     if (document.visibilityState === 'hidden' && connected()) {
                         console.log('Pause language server');
                         webSocket.sock.close();
