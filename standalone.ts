@@ -4,9 +4,26 @@ import { launch as launchCpp } from './providers/cpp';
 import { launch as launchJava } from './providers/java';
 import { launch as launchPython } from './providers/python';
 
-const handler = (launch) => function (conn) {
+const limit = {
+    java: 5,
+    python: 10,
+    cpp: 9999,
+};
+
+const count = {
+    java: 0,
+    cpp: 0,
+    python: 0,
+};
+
+const handler = (launch, type) => function (conn) {
     let lastEvent = Date.now();
     let interval;
+    if (count[type] >= limit) {
+        setTimeout(() => conn.close(), 30000);
+        return;
+    }
+    count[type]++;
     try {
         console.log('Launching ', launch, conn.url);
         let args = {};
@@ -37,6 +54,7 @@ const handler = (launch) => function (conn) {
             interval = null;
             conn.close();
             server.dispose();
+            count[type]--;
         };
         interval = setInterval(() => {
             if (Date.now() - lastEvent > 60000) gc();
@@ -50,15 +68,15 @@ const handler = (launch) => function (conn) {
 const server = http.createServer();
 
 const cpp = sockjs.createServer({ prefix: '/lsp/cpp' });
-cpp.on('connection', handler(launchCpp));
+cpp.on('connection', handler(launchCpp, 'cpp'));
 cpp.installHandlers(server);
 
 const python = sockjs.createServer({ prefix: '/lsp/python' });
-python.on('connection', handler(launchPython));
+python.on('connection', handler(launchPython, 'python'));
 python.installHandlers(server);
 
 const java = sockjs.createServer({ prefix: '/lsp/java' });
-java.on('connection', handler(launchJava));
+java.on('connection', handler(launchJava, 'java'));
 java.installHandlers(server);
 
 server.listen(+process.argv[1] || +process.argv[2] || 9999, '0.0.0.0', () => {
