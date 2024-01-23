@@ -7,7 +7,7 @@ import { launch as launchPython } from './providers/python';
 const limit = {
     java: 5,
     python: 10,
-    cpp: 9999,
+    cpp: 50,
 };
 
 const count = {
