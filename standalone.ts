@@ -4,6 +4,9 @@ import { launch as launchCpp } from './providers/cpp';
 import { launch as launchJava } from './providers/java';
 import { launch as launchPython } from './providers/python';
 
+process.on('unhandledRejection', (e) => console.error(e));
+process.on('uncaughtException', (e) => console.error(e));
+
 const limit = {
     java: 5,
     python: 10,

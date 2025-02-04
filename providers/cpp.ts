@@ -25,6 +25,9 @@ export function launch(socket: rpc.IWebSocket, { style }) {
     serverConnection.onClose(() => {
         fs.removeSync(tmpFolder);
     });
+    socket.onClose(() => {
+        serverConnection.dispose();
+    });
     server.forward(socketConnection, serverConnection, getPipeline(tmpFolder));
     return serverConnection;
 }

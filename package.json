@@ -6,9 +6,6 @@
   "author": "undefined <masnn0@outlook.com>",
   "license": "AGPL-3.0-only",
   "bin": "bin/hydro-language-server",
-  "scripts": {
-    "build": "node build.js"
-  },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^20.11.5",
