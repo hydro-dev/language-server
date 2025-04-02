@@ -1,6 +1,6 @@
-import {} from '@hydrooj/ui-default';
 import alias from 'esbuild-plugin-alias';
-import { Context, SystemModel, UiContextBase } from 'hydrooj';
+import {} from '@hydrooj/ui-default';
+import { SystemModel, UiContextBase } from 'hydrooj';
 
 declare module 'hydrooj' {
     interface UiContextBase {
@@ -10,7 +10,7 @@ declare module 'hydrooj' {
 
 export const name = 'lsp-client';
 
-export function apply(ctx: Context) {
+export function apply() {
     Hydro.ui.esbuildPlugins ||= [];
     Hydro.ui.esbuildPlugins.push(
         alias({
@@ -24,9 +24,9 @@ export function apply(ctx: Context) {
             return SystemModel.get('language-server.host') || 'wss://hydro.ac';
         },
     });
-    ctx.on('dispose', () => {
+    return () => {
         Object.defineProperty(UiContextBase, 'lspHost', {
             enumerable: false,
         });
-    });
+    };
 }

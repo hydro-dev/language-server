@@ -1,7 +1,7 @@
 import { dirname, join } from 'path';
 import * as rpc from '@codingame/monaco-jsonrpc';
-import { fs } from '@hydrooj/utils';
 import * as lsp from 'vscode-languageserver';
+import { fs } from '@hydrooj/utils';
 
 export function getPipeline(tmpFolder: string, folders = []) {
     let slashStyle = false;

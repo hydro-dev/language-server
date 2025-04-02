@@ -8,18 +8,21 @@
   "bin": "bin/hydro-language-server",
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^20.11.5",
+    "@types/node": "^22.13.14",
     "@types/sockjs": "^0.3.36",
-    "monaco-editor": "^0.45.0"
+    "monaco-editor": "^0.52.2"
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "0.3.1",
     "@codingame/monaco-languageclient": "0.17.4",
-    "@hydrooj/utils": "^1.4.11",
+    "@hydrooj/utils": "^1.4.33",
     "esbuild-plugin-alias": "^0.2.1",
     "js-yaml": "^4.1.0",
     "sockjs": "^0.3.24",
     "vscode-languageserver": "7.0.0"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.45.0"
   },
   "resolutions": {
     "vscode-languageserver": "7.0.0"
