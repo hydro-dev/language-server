@@ -7,8 +7,8 @@ import {
 import type { editor } from 'monaco-editor';
 
 const endpoint = (window as any).UiContext.lspHost
-    || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
-if (endpoint === 'wss://hydro.ac') console.log('Using language server provided by https://hydro.ac');
+  || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
+if (['hydro.ac', 'hydrooj.com'].some((t) => endpoint.includes(t))) console.log('Using language server provided by https://hydro.ac');
 const baseUrl = `${endpoint}/lsp/`;
 let loaded = false;
 

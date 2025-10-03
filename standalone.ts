@@ -8,9 +8,9 @@ process.on('unhandledRejection', (e) => console.error(e));
 process.on('uncaughtException', (e) => console.error(e));
 
 const limit = {
-    java: 5,
-    python: 10,
-    cpp: 50,
+    java: 10,
+    python: 30,
+    cpp: 150,
 };
 
 const count = {
@@ -22,11 +22,12 @@ const count = {
 const handler = (launch, type) => function (conn) {
     let lastEvent = Date.now();
     let interval;
-    if (count[type] >= limit) {
+    if (count[type] >= limit[type]) {
         setTimeout(() => conn.close(), 30000);
         return;
     }
     count[type]++;
+    console.log(count);
     try {
         console.log('Launching ', launch, conn.url);
         let args = {};
@@ -35,6 +36,7 @@ const handler = (launch, type) => function (conn) {
         } else {
             args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
         }
+        let gced = false;
         const server = launch({
             send: (s) => conn.write(s),
             onMessage: (cb) => conn.on('data', (msg) => {
@@ -57,7 +59,9 @@ const handler = (launch, type) => function (conn) {
             interval = null;
             conn.close();
             server.dispose();
-            count[type]--;
+            if (!gced) count[type]--;
+            console.log(count);
+            gced = true;
         };
         interval = setInterval(() => {
             if (Date.now() - lastEvent > 60000) gc();
