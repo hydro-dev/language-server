@@ -21,7 +21,7 @@ export function apply() {
         configurable: true,
         enumerable: true,
         get() {
-            return SystemModel.get('language-server.host') || 'wss://hydro.ac';
+            return SystemModel.get('language-server.host') || 'wss://lsp.hydrooj.com';
         },
     });
     return () => {
