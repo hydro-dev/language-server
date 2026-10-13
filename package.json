@@ -9,16 +9,20 @@
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.13.3",
-    "@types/sockjs": "^0.3.36",
+    "@types/ws": "^8.18.1",
     "monaco-editor": "^0.57.0"
   },
   "dependencies": {
     "@codingame/monaco-jsonrpc": "0.3.1",
-    "@codingame/monaco-languageclient": "0.17.4",
     "@hydrooj/utils": "^1.4.34-beta.3",
     "esbuild-plugin-alias": "^0.2.1",
-    "js-yaml": "^5.4.3",
-    "monaco-editor": "^0.57.0"
+    "js-yaml": "^5.4.2",
+    "monaco-languageclient": "0.18.1",
+    "ws": "^8.22.0",
+    "vscode-languageserver": "7.0.0"
+  },
+  "peerDependencies": {
+    "monaco-editor": ">=0.45.0"
   },
   "resolutions": {
     "vscode-languageserver": "7.0.0"

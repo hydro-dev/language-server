@@ -1,15 +1,21 @@
 import { Socket } from '@hydrooj/ui-default';
+import { listen } from '@codingame/monaco-jsonrpc';
+import {
+  CloseAction, createConnection, ErrorAction,
+  MonacoLanguageClient, MonacoServices,
+} from 'monaco-languageclient';
 import type { editor } from 'monaco-editor';
 
 const endpoint = (window as any).UiContext.lspHost
   || `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`;
-if (['hydro.ac', 'hydrooj.com', 'hydro.org.cn'].some((t) => endpoint.includes(t))) console.log('Using language server provided by https://hydro.ac');
+if (['hydro.ac', 'hydrooj.com'].some((t) => endpoint.includes(t))) console.log('Using language server provided by https://hydro.ac');
 const baseUrl = `${endpoint}/lsp/`;
 let loaded = false;
 
 export function apply(monaco: typeof import('monaco-editor')) {
   if (loaded) return;
   loaded = true;
+  MonacoServices.install(monaco);
 
   function registerLspProvider(
     name: string, languages: string[], documentSelector: string[],
@@ -20,7 +26,29 @@ export function apply(monaco: typeof import('monaco-editor')) {
     function addModel(model: editor.IModel) {
       if (!languages.includes(model.getLanguageId().toLowerCase()) || connected()) return;
       webSocket = new Socket(`${url}?${encodeURIComponent(JSON.stringify(args(model)))}`, true);
-      new monaco.lsp.MonacoLspClient(monaco.lsp.WebSocketTransport.fromWebSocket(webSocket)); // eslint-disable-line no-new
+      listen({
+        webSocket: webSocket as any,
+        onConnection: (connection) => {
+          const languageClient = new MonacoLanguageClient({
+            name,
+            clientOptions: {
+              documentSelector,
+              errorHandler: {
+                error: () => ErrorAction.Continue,
+                closed: () => CloseAction.DoNotRestart,
+              },
+            },
+            connectionProvider: {
+              get: (errorHandler, closeHandler) => Promise.resolve(createConnection(connection, errorHandler, closeHandler)),
+            },
+          });
+          languageClient.start();
+          webSocket.onclose = async () => {
+            await languageClient.stop();
+            connection.end();
+          };
+        },
+      });
     }
     monaco.editor.onDidCreateModel(addModel);
     monaco.editor.onWillDisposeModel((model) => {

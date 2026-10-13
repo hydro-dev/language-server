@@ -14,7 +14,7 @@ export function apply() {
     Hydro.ui.esbuildPlugins ||= [];
     Hydro.ui.esbuildPlugins.push(
         alias({
-            vscode: require.resolve('@codingame/monaco-languageclient/lib/vscode-compatibility'),
+            vscode: require.resolve('monaco-languageclient/lib/vscode-compatibility'),
         }),
     );
     Object.defineProperty(UiContextBase, 'lspHost', {

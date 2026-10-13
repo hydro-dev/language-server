@@ -1,5 +1,5 @@
 import http from 'http';
-import * as sockjs from 'sockjs';
+import { WebSocketServer, type WebSocket } from 'ws';
 import { launch as launchCpp } from './providers/cpp';
 import { launch as launchJava } from './providers/java';
 import { launch as launchPython } from './providers/python';
@@ -19,7 +19,7 @@ const count = {
     python: 0,
 };
 
-const handler = (launch, type) => function (conn) {
+const handler = (launch, type) => function (conn: WebSocket, req: http.IncomingMessage) {
     let lastEvent = Date.now();
     let interval;
     if (count[type] >= limit[type]) {
@@ -29,20 +29,21 @@ const handler = (launch, type) => function (conn) {
     count[type]++;
     console.log(count);
     try {
-        console.log('Launching ', launch, conn.url);
+        console.log('Launching ', launch, req.url);
         let args = {};
-        if (conn.url.includes('?style=')) {
-            args = { style: decodeURIComponent(conn.url.split('?style=')[1]) };
+        if (req.url.includes('?style=')) {
+            args = { style: decodeURIComponent(req.url.split('?style=')[1]) };
         } else {
-            args = JSON.parse(decodeURIComponent(conn.url.split('?')[1] || '') || '{}') || {};
+            args = JSON.parse(decodeURIComponent(req.url.split('?')[1] || '') || '{}') || {};
         }
         let gced = false;
         const server = launch({
-            send: (s) => conn.write(s),
-            onMessage: (cb) => conn.on('data', (msg) => {
+            send: (s) => conn.send(s),
+            onMessage: (cb) => conn.on('message', (data) => {
                 lastEvent = Date.now();
+                const msg = data.toString();
                 if (msg?.trim() === 'pong') return;
-                if (msg?.trim() === 'ping') conn.write('pong');
+                if (msg?.trim() === 'ping') conn.send('pong');
                 else {
                     try {
                         JSON.parse(msg);
@@ -50,9 +51,9 @@ const handler = (launch, type) => function (conn) {
                     } catch (e) { }
                 }
             }),
-            onClose: (cb) => conn.on('close', (res, reason) => cb(res, reason)),
-            onError: (cb) => conn.on('error', (err) => cb(err)),
-            dispose: () => conn.close('3000', 'disposed'),
+            onClose: (cb) => conn.on('close', cb),
+            onError: (cb) => conn.on('error', cb),
+            dispose: () => conn.close(3000, 'disposed'),
         }, args);
         const gc = () => {
             if (interval) clearInterval(interval);
@@ -72,20 +73,27 @@ const handler = (launch, type) => function (conn) {
     }
 };
 
-const server = http.createServer();
+const routes = {
+    '/lsp/cpp': handler(launchCpp, 'cpp'),
+    '/lsp/python': handler(launchPython, 'python'),
+    '/lsp/java': handler(launchJava, 'java'),
+};
 
-const cpp = sockjs.createServer({ prefix: '/lsp/cpp' });
-cpp.on('connection', handler(launchCpp, 'cpp'));
-cpp.installHandlers(server);
-
-const python = sockjs.createServer({ prefix: '/lsp/python' });
-python.on('connection', handler(launchPython, 'python'));
-python.installHandlers(server);
-
-const java = sockjs.createServer({ prefix: '/lsp/java' });
-java.on('connection', handler(launchJava, 'java'));
-java.installHandlers(server);
-
+const server = http.createServer((req, res) => {
+    res.writeHead(200);
+    res.end('ok');
+});
+const wss = new WebSocketServer({ noServer: true });
+server.on('upgrade', (req, socket, head) => {
+    const pathname = (req.url || '').split('?')[0];
+    for (const [prefix, h] of Object.entries(routes)) {
+        if (pathname === `${prefix}/websocket` || pathname.startsWith(`${prefix}/`)) {
+            wss.handleUpgrade(req, socket, head, (ws) => h(ws, req));
+            return;
+        }
+    }
+    socket.destroy();
+});
 server.listen(+process.argv[1] || +process.argv[2] || 9999, '0.0.0.0', () => {
     console.log(`Server listening at ${(server.address() as any).port}`);
 });
