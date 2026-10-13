@@ -7,13 +7,16 @@ export function getPipeline(tmpFolder: string, folders = []) {
     let slashStyle = false;
     const pendingFolder = new Set<string>();
     let forceUri = '';
+    let filenameCache = '';
 
-    function removeHydroPrefix(uri: string, replacement = '') {
+    function removeHydroPrefix(uri: string, replacement = '', tryRemember = true) {
+        if (tryRemember) filenameCache = uri;
+        else if (filenameCache && filenameCache.toLowerCase() === uri.toLowerCase()) uri = filenameCache;
         if (uri.startsWith('hydro://')) {
             slashStyle = true;
             return uri.replace('hydro://', replacement);
         }
-        if (uri.startsWith('hydro:')) return uri.replace('hydro:', replacement);
+        if (uri.startsWith('hydro:')) return uri.toLowerCase().replace('hydro:', replacement);
         return uri;
     }
 
@@ -32,16 +35,16 @@ export function getPipeline(tmpFolder: string, folders = []) {
                         fs.writeFileSync(`${tmpFolder}/Main.java`, params.textDocument.text);
                     }
                 } else {
-                    pendingFolder.add(removeHydroPrefix(params.textDocument.uri));
-                    params.textDocument.uri = removeHydroPrefix(params.textDocument.uri, `file://${tmpFolder}/`);
+                    pendingFolder.add(removeHydroPrefix(params.textDocument.uri, '', rpc.isRequestMessage(message)));
+                    params.textDocument.uri = removeHydroPrefix(params.textDocument.uri, `file://${tmpFolder}/`, rpc.isRequestMessage(message));
                 }
             }
             if (params.uri?.startsWith('hydro:')) {
                 if (params.uri?.endsWith('.java')) {
                     params.uri = `file://${tmpFolder}/Main.java`;
                 } else {
-                    pendingFolder.add(removeHydroPrefix(params.uri));
-                    params.uri = removeHydroPrefix(params.uri, `file://${tmpFolder}/`);
+                    pendingFolder.add(removeHydroPrefix(params.uri, '', rpc.isRequestMessage(message)));
+                    params.uri = removeHydroPrefix(params.uri, `file://${tmpFolder}/`, rpc.isRequestMessage(message));
                 }
             } else if (params.uri?.startsWith(`file://${tmpFolder}/`)) {
                 params.uri = forceUri || params.uri.replace(`file://${tmpFolder}/`, slashStyle ? 'hydro://' : 'hydro:');

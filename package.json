@@ -17,12 +17,8 @@
     "@codingame/monaco-languageclient": "0.17.4",
     "@hydrooj/utils": "^1.4.34-beta.3",
     "esbuild-plugin-alias": "^0.2.1",
-    "js-yaml": "^5.4.2",
-    "sockjs": "^0.3.24",
-    "vscode-languageserver": "7.0.0"
-  },
-  "peerDependencies": {
-    "monaco-editor": ">=0.45.0"
+    "js-yaml": "^5.4.3",
+    "monaco-editor": "^0.57.0"
   },
   "resolutions": {
     "vscode-languageserver": "7.0.0"
